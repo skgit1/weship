@@ -10,6 +10,7 @@ const TIMEZONE = "America/New_York";
 
 type WeatherData = {
   temperature: number;
+  windSpeed: number;
 };
 
 export default function WeatherWidget() {
@@ -21,10 +22,13 @@ export default function WeatherWidget() {
     async function fetchWeather() {
       try {
         const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m&timezone=${TIMEZONE}`
+          `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,windspeed_10m&timezone=${TIMEZONE}&temperature_unit=fahrenheit&wind_speed_unit=mph`
         );
         const data = await res.json();
-        setWeather({ temperature: Math.round(data.current.temperature_2m) });
+        setWeather({
+          temperature: Math.round(data.current.temperature_2m),
+          windSpeed: Math.round(data.current.windspeed_10m),
+        });
       } catch {
         setError(true);
       }
@@ -58,7 +62,6 @@ export default function WeatherWidget() {
         backgroundPosition: "center",
       }}
     >
-      {/* subtle dark overlay for text legibility */}
       <div className="absolute inset-0 bg-black/20" />
 
       <div className="relative z-10 flex flex-col justify-between h-full p-7">
@@ -84,10 +87,21 @@ export default function WeatherWidget() {
           </div>
         </div>
 
-        {/* bottom left */}
-        <div className="text-white">
-          <p className="text-2xl font-semibold leading-tight">{CITY}</p>
-          <p className="text-2xl font-semibold leading-tight">{STATE}</p>
+        {/* bottom row */}
+        <div className="flex items-end justify-between text-white">
+          <div>
+            <p className="text-2xl font-semibold leading-tight">{CITY}</p>
+            <p className="text-2xl font-semibold leading-tight">{STATE}</p>
+          </div>
+
+          <div className="text-right">
+            {weather && (
+              <>
+                <p className="text-sm font-medium opacity-80">Wind</p>
+                <p className="text-xl font-semibold">{weather.windSpeed} mph</p>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
